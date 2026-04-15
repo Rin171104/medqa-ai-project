@@ -1,0 +1,66 @@
+from __future__ import annotations
+
+import re
+from typing import Optional, Tuple
+
+
+def parse_mcq_output(text: str) -> Tuple[Optional[str], str]:
+    """Parse model output into (answer_letter, explanation)."""
+
+    cleaned = (text or "").strip()
+
+    # ==========================================
+    # 1. EXTRACT ANSWER
+    # ==========================================
+    answer: Optional[str] = None
+
+    answer_patterns = [
+        r"(?im)^\s*Answer\s*[:\-]\s*([ABCD])\b",
+        r"(?im)^\s*Answer\s*(is)?\s*[:\-]?\s*([ABCD])\b",
+        r"(?im)^\s*Correct\s*answer\s*[:\-]?\s*([ABCD])\b",
+        r"(?im)^\s*Đáp\s*án\s*[:\-]\s*([ABCD])\b",
+        r"(?im)<\s*answer\s*>\s*([ABCD])\s*<\s*/\s*answer\s*>",
+    ]
+
+    for pat in answer_patterns:
+        m = re.search(pat, cleaned)
+        if m:
+            # group có thể khác index
+            answer = next(g for g in m.groups() if g).upper()
+            break
+
+    # 🔥 fallback nếu không match
+    if not answer:
+        m = re.search(r"\b([ABCD])\b", cleaned.upper())
+        if m:
+            answer = m.group(1)
+
+    # ==========================================
+    # 2. EXTRACT EXPLANATION
+    # ==========================================
+    explanation = ""
+
+    exp_patterns = [
+        r"(?ims)\bExplanation\s*[:\-]\s*(.+)$",
+        r"(?ims)\bGiải\s*thích\s*[:\-]\s*(.+)$",
+        r"(?ims)<\s*explanation\s*>\s*(.+?)\s*<\s*/\s*explanation\s*>",
+    ]
+
+    for pat in exp_patterns:
+        m = re.search(pat, cleaned)
+        if m:
+            explanation = m.group(1).strip()
+            break
+
+    # fallback explanation
+    if not explanation:
+        explanation = re.sub(
+            r"(?im)^\s*(Answer|Correct answer|Đáp\s*án).*?$",
+            "",
+            cleaned,
+        ).strip()
+
+        if not explanation:
+            explanation = cleaned
+
+    return answer, explanation

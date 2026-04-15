@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific: exclude large data and model artifacts
+med-ai-chatbot/data/
+
+# Model weights / trainer states (often large)
+med-ai-chatbot/model/adapter/*.safetensors
+med-ai-chatbot/model/adapter/*.pt
+med-ai-chatbot/model/adapter/*.pth
+med-ai-chatbot/model/adapter/*.bin
+med-ai-chatbot/model/adapter/*.ckpt
