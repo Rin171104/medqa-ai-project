@@ -88,7 +88,8 @@ if ask:
                     "question": question,
                     "options": options,
                     "answer": data.get("answer"),
-                    "explanation": data.get("explanation")
+                    "explanation": data.get("explanation"),
+                    "raw_output": data.get("raw_output"),
                 })
 
             except Exception as e:
@@ -104,7 +105,8 @@ if st.session_state.history:
     last = st.session_state.history[-1]
 
     st.success(f"→ Answer: {last['answer']}")
-    st.write(f"→ Explanation: {last['explanation']}")
+    st.text_area("Explanation", value=last.get("explanation") or "", height=200, disabled=True)
+    st.text_area("Raw output", value=last.get("raw_output") or "", height=300, disabled=True)
 else:
     st.info("Chưa có kết quả")
 
@@ -127,4 +129,5 @@ else:
 
             st.write("**Kết quả:**")
             st.write(f"Answer: {item['answer']}")
-            st.write(f"Explanation: {item['explanation']}")
+            st.text_area("Explanation", value=item.get("explanation") or "", height=160, disabled=True)
+            st.text_area("Raw output", value=item.get("raw_output") or "", height=200, disabled=True)

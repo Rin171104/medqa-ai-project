@@ -1,3 +1,4 @@
+import logging
 from typing import Dict
 
 from fastapi import APIRouter, HTTPException
@@ -6,6 +7,7 @@ from pydantic import BaseModel, Field, validator
 from backend.services.inference import ask_mcq
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
+logger = logging.getLogger(__name__)
 
 
 # ==========================
@@ -51,5 +53,5 @@ def ask(req: AskRequest) -> AskResponse:
         return AskResponse(**result)
 
     except Exception as e:
-        # 🔥 tránh crash server
+        logger.exception("/chat/ask failed")
         raise HTTPException(status_code=500, detail=str(e))

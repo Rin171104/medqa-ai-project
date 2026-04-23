@@ -29,11 +29,17 @@ def parse_mcq_output(text: str) -> Tuple[Optional[str], str]:
             answer = next(g for g in m.groups() if g).upper()
             break
 
-    # 🔥 fallback nếu không match
+    # Fallback: only accept answers that appear at line starts or after explicit keywords
     if not answer:
-        m = re.search(r"\b([ABCD])\b", cleaned.upper())
-        if m:
-            answer = m.group(1)
+        fallback_patterns = [
+            r"(?im)^\s*([ABCD])\s*[\)\.:\-]",  # e.g. "B." or "C)"
+            r"(?im)\b(the\s+answer\s+is|answer\s+is|correct\s+answer)\s*[:\-]?\s*([ABCD])\b",
+        ]
+        for pat in fallback_patterns:
+            m = re.search(pat, cleaned)
+            if m:
+                answer = next(g for g in m.groups() if g).upper()
+                break
 
     # ==========================================
     # 2. EXTRACT EXPLANATION
