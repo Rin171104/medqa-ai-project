@@ -1,13 +1,6 @@
 ---
-base_model: Qwen/Qwen2.5-3B
+base_model: /data2/cmdir/home/ioit107/vnu/models/Qwen/Qwen3-8B
 library_name: peft
-pipeline_tag: text-generation
-tags:
-- base_model:adapter:Qwen/Qwen2.5-3B
-- grpo
-- lora
-- transformers
-- trl
 ---
 
 # Model Card for Model ID
@@ -206,4 +199,4 @@ Carbon emissions can be estimated using the [Machine Learning Impact calculator]
 [More Information Needed]
 ### Framework versions
 
-- PEFT 0.18.1
+- PEFT 0.15.0
