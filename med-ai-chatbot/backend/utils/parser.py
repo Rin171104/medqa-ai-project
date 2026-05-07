@@ -12,57 +12,51 @@ def parse_mcq_output(text: str) -> Tuple[Optional[str], str]:
     cleaned_no_think = re.sub(r"(?is)<think>.*?</think>", "", cleaned).strip()
 
     # ==========================================
-    # 1. EXTRACT ANSWER
+    # 1. EXTRACT ANSWER (PREFER TAGS)
     # ==========================================
     answer: Optional[str] = None
 
-    answer_patterns = [
-        r"(?im)^\s*Answer\s*[:\-]\s*([ABCD])\b",
-        r"(?im)^\s*Answer\s*(?:is)?\s*[:\-]?\s*([ABCD])\b",
-        r"(?im)^\s*Correct\s*answer\s*[:\-]?\s*([ABCD])\b",
-        r"(?im)^\s*Đáp\s*án\s*[:\-]\s*([ABCD])\b",
-        r"(?im)<\s*answer\s*>\s*([ABCD])\s*<\s*/\s*answer\s*>",
-    ]
-
-    for pat in answer_patterns:
-        m = re.search(pat, cleaned_no_think)
-        if m:
-            # pick the letter group only
-            letter = next((g for g in m.groups() if g and g.upper() in {"A", "B", "C", "D"}), None)
-            if letter:
-                answer = letter.upper()
-            break
+    tag_answer = re.search(r"(?is)<\s*answer\s*>\s*([ABCD])\s*<\s*/\s*answer\s*>", cleaned)
+    if tag_answer:
+        answer = tag_answer.group(1).upper()
 
     # Fallback: only accept answers that appear at line starts or after explicit keywords
     if not answer:
         fallback_patterns = [
-            r"(?im)^\s*([ABCD])\s*[\)\.:\-]",  # e.g. "B." or "C)"
-            r"(?im)\b(the\s+answer\s+is|answer\s+is|correct\s+answer)\s*[:\-]?\s*([ABCD])\b",
+            r"(?im)^\s*Answer\s*[:\-]\s*([ABCD])\b",
+            r"(?im)^\s*Answer\s*(?:is)?\s*[:\-]?\s*([ABCD])\b",
+            r"(?im)^\s*Correct\s*answer\s*[:\-]?\s*([ABCD])\b",
+            r"(?im)^\s*Đáp\s*án\s*[:\-]\s*([ABCD])\b",
         ]
         for pat in fallback_patterns:
-            m = re.search(pat, cleaned)
+            m = re.search(pat, cleaned_no_think)
             if m:
-                letter = next((g for g in m.groups() if g and g.upper() in {"A", "B", "C", "D"}), None)
-                if letter:
-                    answer = letter.upper()
-                    break
+                answer = m.group(1).upper()
+                break
 
     # ==========================================
-    # 2. EXTRACT EXPLANATION
+    # 2. EXTRACT EXPLANATION (PREFER TAGS)
     # ==========================================
     explanation = ""
 
-    exp_patterns = [
-        r"(?ims)\bExplanation\s*[:\-]\s*(.+)$",
-        r"(?ims)\bGiải\s*thích\s*[:\-]\s*(.+)$",
-        r"(?ims)<\s*explanation\s*>\s*(.+?)\s*<\s*/\s*explanation\s*>",
-    ]
+    tag_explanation = re.search(
+        r"(?is)<\s*explanation\s*>\s*(.+?)\s*<\s*/\s*explanation\s*>",
+        cleaned,
+    )
+    if tag_explanation:
+        explanation = tag_explanation.group(1).strip()
 
-    for pat in exp_patterns:
-        m = re.search(pat, cleaned)
-        if m:
-            explanation = m.group(1).strip()
-            break
+    if not explanation:
+        exp_patterns = [
+            r"(?ims)\bExplanation\s*[:\-]\s*(.+)$",
+            r"(?ims)\bGiải\s*thích\s*[:\-]\s*(.+)$",
+        ]
+
+        for pat in exp_patterns:
+            m = re.search(pat, cleaned)
+            if m:
+                explanation = m.group(1).strip()
+                break
 
     # fallback explanation
     if not explanation:

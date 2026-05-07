@@ -39,12 +39,15 @@ def ask_mcq(question: str, options: Dict[str, str]) -> Dict[str, str]:
         f"B. {options['B'].strip()}\n"
         f"C. {options['C'].strip()}\n"
         f"D. {options['D'].strip()}\n\n"
-        "Choose the correct answer (A/B/C/D) and explain briefly."
+        "Return ONLY the following tags and nothing else:\n"
+        "<answer>A|B|C|D</answer>\n"
+        "<explanation>short explanation</explanation>\n"
+        "<think>optional internal reasoning</think>"
     )
 
     system_prompt = (
         "You are a medical AI assistant. "
-        "Answer multiple choice medical questions correctly and explain briefly."
+        "Always respond using the exact XML-like tags requested by the user."
     )
 
     if hasattr(tokenizer, "apply_chat_template"):
