@@ -75,6 +75,12 @@ def _extract_think(raw_output: str | None) -> str:
     return match.group(1).strip() if match else ""
 
 
+def _clean_explanation(text: str | None) -> str:
+    if not text:
+        return ""
+    return re.sub(r"(?is)<think>.*?</think>\n*", "", text).strip()
+
+
 # ==============================
 # BUTTON
 # ==============================
@@ -131,7 +137,7 @@ if st.session_state.history:
     last = st.session_state.history[-1]
 
     st.success(f"→ Answer: {last['answer']}")
-    st.text_area("Explanation", value=last.get("explanation") or "", height=200, disabled=True)
+    st.text_area("Explanation", value=_clean_explanation(last.get("explanation")), height=200, disabled=True)
     st.text_area("Think", value=_extract_think(last.get("raw_output")) or "", height=260, disabled=True)
 else:
     st.info("Chưa có kết quả")
@@ -162,5 +168,5 @@ else:
 
             st.write("**Kết quả:**")
             st.write(f"Answer: {item['answer']}")
-            st.text_area("Explanation", value=item.get("explanation") or "", height=160, disabled=True)
+            st.text_area("Explanation", value=_clean_explanation(item.get("explanation")), height=160, disabled=True)
             st.text_area("Think", value=_extract_think(item.get("raw_output")) or "", height=200, disabled=True)
